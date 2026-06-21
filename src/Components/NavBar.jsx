@@ -1,22 +1,22 @@
+import user from '../assets/user.svg'
 function NavBar() {
     return (
-        <nav>
-            <div className="flex">
-                <p className="text-4xl  font-bold text-[#2573E6]">SYNTAX_CORE</p>
-                <ul className="flex ">
-                    <li className=" font-bold">WORKSPACE</li>
-                    <li className=" font-bold">Sessions</li>
-                    <li className=" font-bold">History</li>
-                    <li className=" font-bold">Docs</li>
+        <nav className='flex items-center justify-between border-b-2 border-[#0D1C2D] p-4 ' >
+            <div className=" flex items-center gap-6 ">
+                <p className="text-4xl  font-bold text-[#81AAFF]">SYNTAX_CORE</p>
+                <ul className="flex gap-x-6 text-[#94A3B8]">
+                    <li className=" ">WorkSpace</li>
+                    <li className=" ">Edit</li>
+                    <li className=" ">History</li>
+                    <li className=" ">Help</li>
                 </ul>
             </div>
 
-            <div>
-                <button className=" font-Mono bg-[#053900]">Run Code</button>
-                <button>Setting</button>
-
+            <div className='h-8 w-8 overflow-hidden rounded-2xl border-2 border-[#233143]'>
+                <img className='object-cover invert' src={user} alt="" />
             </div>
         </nav>
+
 
     )
 }

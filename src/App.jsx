@@ -1,10 +1,10 @@
-import NavBar from './Components/NavBar'
+import Dashboard from './Components/DashBoard'
 function App() {
 
 
   return (
     <>
-      <NavBar />
+      <Dashboard />
     </>
   )
 }
