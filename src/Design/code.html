@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Alexandria AI Code Editor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<style data-purpose="alexandria-theme">
+    :root {
+      --font-serif: 'Noto Serif', serif;
+      --font-sans: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      
+      --color-bg-primary: #0f141e; /* Deep sophisticated blue-dark */
+      --color-bg-secondary: #161d2b;
+      --color-bg-tertiary: #1e2638;
+      
+      --color-text-primary: #e2e8f0;
+      --color-text-secondary: #94a3b8;
+      --color-text-muted: #64748b;
+      
+      --color-accent: #3b82f6;
+      --color-accent-hover: #2563eb;
+      
+      --color-border: #2e3c54;
+      
+      /* Syntax Highlighting */
+      --syntax-keyword: #c678dd;
+      --syntax-function: #61afef;
+      --syntax-string: #98c379;
+      --syntax-number: #d19a66;
+      --syntax-comment: #5c6370;
+      
+      /* Feedback Colors */
+      --feedback-suggestion: rgba(59, 130, 246, 0.1);
+      --feedback-suggestion-border: rgba(59, 130, 246, 0.4);
+      --feedback-warning: rgba(239, 68, 68, 0.1);
+      --feedback-warning-border: rgba(239, 68, 68, 0.4);
+      --feedback-performance: rgba(16, 185, 129, 0.1);
+      --feedback-performance-border: rgba(16, 185, 129, 0.4);
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--color-bg-primary);
+      color: var(--color-text-primary);
+    }
+
+    .font-serif {
+      font-family: var(--font-serif);
+    }
+    
+    .font-mono {
+      font-family: var(--font-mono);
+    }
+
+    /* Custom Scrollbar for sleek look */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--color-bg-secondary); 
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--color-border); 
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--color-text-muted); 
+    }
+  </style>
+<style data-purpose="syntax-styles">
+    .keyword { color: var(--syntax-keyword); }
+    .function { color: var(--syntax-function); }
+    .string { color: var(--syntax-string); }
+    .number { color: var(--syntax-number); }
+    .comment { color: var(--syntax-comment); font-style: italic; }
+    .variable { color: #e5c07b; }
+    .operator { color: #56b6c2; }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+<!-- BEGIN: Top Navigation -->
+<header class="flex-none h-14 border-b border-[#2e3c54] bg-[#0f141e] flex items-center justify-between px-6 z-10 relative">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 text-blue-400 font-serif font-bold text-xl tracking-wide">
+<i class="fa-solid fa-microchip"></i>
+<span>AI</span>
+</div>
+<nav class="hidden md:flex items-center gap-5 text-sm text-[#94a3b8] font-serif">
+<a class="hover:text-white transition-colors" href="#">File</a>
+<a class="hover:text-white transition-colors" href="#">Edit</a>
+<a class="hover:text-white transition-colors" href="#">View</a>
+<a class="hover:text-white transition-colors" href="#">AI Tools</a>
+<a class="hover:text-white transition-colors" href="#">Help</a>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<img alt="User Avatar" class="w-8 h-8 rounded-full border border-[#2e3c54]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqYNMxj7oz6GaJ1qyDDwnpmOiW84NeBm37nY9wayxHUNgy_SmoEiB2Pyoh1BlCsmvFsm-JA3XprQfBu6VnFwpNyv5i5ddjg_IA6cO908uIr0zbcWp3QYs_Ak2Jk1pSfExFur6k8hdMogCFMbFQR3XrMvGRDtSlN55Y334L2JDjjjstj6gZKGO3Pb7HQ0bJlh4-zdqVV4x7Ke6GOhtwun8g_Q_J0I0oukuleXxT3PBFAp3fkjkPF_wsH7mDyVFw98f0oVaBHQmXTZQ"/>
+</div>
+</header>
+<!-- END: Top Navigation -->
+<!-- BEGIN: Page Header -->
+<div class="flex-none py-8 text-center bg-gradient-to-b from-[#0f141e] to-[#161d2b]">
+<h1 class="text-4xl md:text-5xl font-serif font-bold tracking-tight">
+<span class="text-blue-400">AI Code Editor</span> &amp;<br/>Feedback View
+    </h1>
+</div>
+<!-- END: Page Header -->
+<!-- BEGIN: Main Workspace Area -->
+<main class="flex-1 flex overflow-hidden p-4 md:p-8 pt-0 gap-6 max-w-[1600px] mx-auto w-full">
+<!-- BEGIN: Editor Application Container -->
+<div class="flex-1 flex border border-[#2e3c54] rounded-xl bg-[#161d2b] shadow-2xl overflow-hidden relative z-0">
+<!-- BEGIN: Activity Bar (Leftmost narrow sidebar) -->
+<div class="w-12 bg-[#0f141e] border-r border-[#2e3c54] flex flex-col items-center py-4 gap-6 text-[#64748b] flex-none">
+<button class="hover:text-white transition-colors" title="Explorer"><i class="fa-regular fa-copy fa-lg text-white"></i></button>
+<button class="hover:text-white transition-colors" title="Search"><i class="fa-solid fa-magnifying-glass fa-lg"></i></button>
+<button class="hover:text-white transition-colors" title="Source Control"><i class="fa-solid fa-code-branch fa-lg"></i></button>
+<button class="hover:text-white transition-colors" title="Run and Debug"><i class="fa-solid fa-play fa-lg"></i></button>
+<button class="hover:text-white transition-colors" title="Extensions"><i class="fa-solid fa-puzzle-piece fa-lg"></i></button>
+<button class="hover:text-white transition-colors" title="Docker"><i class="fa-brands fa-docker fa-lg"></i></button>
+<div class="mt-auto flex flex-col gap-6">
+<button class="hover:text-white transition-colors" title="Accounts"><i class="fa-regular fa-circle-user fa-lg"></i></button>
+<button class="hover:text-white transition-colors" title="Settings"><i class="fa-solid fa-gear fa-lg"></i></button>
+</div>
+</div>
+<!-- END: Activity Bar -->
+<!-- BEGIN: Sidebar (Explorer) -->
+<div class="w-64 bg-[#161d2b] border-r border-[#2e3c54] flex flex-col flex-none hidden lg:flex">
+<div class="px-4 py-2 text-xs font-serif font-semibold text-[#94a3b8] uppercase tracking-wider flex justify-between items-center border-b border-[#2e3c54]">
+<span>Explorer</span>
+<i class="fa-solid fa-ellipsis"></i>
+</div>
+<div class="flex-1 overflow-y-auto py-2">
+<!-- Accordion Header -->
+<div class="px-2 py-1 flex items-center gap-1 text-sm font-bold cursor-pointer hover:bg-[#1e2638]">
+<i class="fa-solid fa-chevron-down text-xs w-4 text-center"></i>
+<span>AI-MORBYESY</span>
+</div>
+<!-- File Tree -->
+<div class="pl-4 text-sm text-[#94a3b8]">
+<div class="py-1 px-2 flex items-center gap-2 hover:bg-[#1e2638] cursor-pointer">
+<i class="fa-solid fa-chevron-right text-xs w-4 text-center"></i>
+<i class="fa-solid fa-folder text-blue-400"></i>
+<span>.vscode</span>
+</div>
+<div class="py-1 px-2 flex items-center gap-2 hover:bg-[#1e2638] cursor-pointer">
+<i class="fa-solid fa-chevron-right text-xs w-4 text-center"></i>
+<i class="fa-solid fa-folder text-gray-400"></i>
+<span>bin</span>
+</div>
+<div class="py-1 px-2 flex items-center gap-2 hover:bg-[#1e2638] cursor-pointer">
+<i class="fa-solid fa-chevron-down text-xs w-4 text-center"></i>
+<i class="fa-solid fa-folder text-blue-300"></i>
+<span>camuda</span>
+</div>
+<div class="pl-6 py-1 px-2 flex items-center gap-2 hover:bg-[#1e2638] cursor-pointer">
+<i class="fa-brands fa-python text-blue-500"></i>
+<span>conesear.py</span>
+</div>
+<div class="py-1 px-2 flex items-center gap-2 bg-[#1e2638] text-white cursor-pointer border-l-2 border-blue-500">
+<i class="fa-solid fa-chevron-down text-xs w-4 text-center"></i>
+<i class="fa-solid fa-folder text-green-400"></i>
+<span>src</span>
+</div>
+<div class="pl-6 py-1 px-2 flex items-center gap-2 hover:bg-[#1e2638] cursor-pointer">
+<i class="fa-brands fa-python text-blue-500"></i>
+<span>__init__.py</span>
+</div>
+<div class="pl-6 py-1 px-2 flex items-center gap-2 hover:bg-[#1e2638] cursor-pointer">
+<i class="fa-brands fa-python text-blue-500 text-white"></i>
+<span>main.py</span>
+</div>
+<div class="py-1 px-2 flex items-center gap-2 hover:bg-[#1e2638] cursor-pointer">
+<i class="fa-brands fa-git-alt text-orange-500 w-4 text-center"></i>
+<span>.gitignore</span>
+</div>
+<div class="py-1 px-2 flex items-center gap-2 hover:bg-[#1e2638] cursor-pointer">
+<i class="fa-solid fa-scale-balanced text-gray-400 w-4 text-center"></i>
+<span>license</span>
+</div>
+<div class="py-1 px-2 flex items-center gap-2 hover:bg-[#1e2638] cursor-pointer">
+<i class="fa-brands fa-npm text-red-500 w-4 text-center"></i>
+<span>package-lock.json</span>
+</div>
+<div class="py-1 px-2 flex items-center gap-2 hover:bg-[#1e2638] cursor-pointer">
+<i class="fa-brands fa-npm text-red-500 w-4 text-center"></i>
+<span>package.json</span>
+</div>
+<div class="py-1 px-2 flex items-center gap-2 hover:bg-[#1e2638] cursor-pointer">
+<i class="fa-solid fa-circle-info text-blue-400 w-4 text-center"></i>
+<span>README.md</span>
+</div>
+</div>
+<div class="mt-4 px-2 py-1 flex items-center gap-1 text-sm font-bold cursor-pointer hover:bg-[#1e2638] border-t border-[#2e3c54]">
+<i class="fa-solid fa-chevron-right text-xs w-4 text-center"></i>
+<span>OUTLINE</span>
+</div>
+<div class="px-2 py-1 flex items-center gap-1 text-sm font-bold cursor-pointer hover:bg-[#1e2638] border-t border-[#2e3c54]">
+<i class="fa-solid fa-chevron-right text-xs w-4 text-center"></i>
+<span>TIMELINE</span>
+</div>
+<div class="px-2 py-1 flex items-center gap-1 text-sm font-bold cursor-pointer hover:bg-[#1e2638] border-t border-[#2e3c54]">
+<i class="fa-solid fa-chevron-right text-xs w-4 text-center"></i>
+<span>AI VIBRKDINGS</span>
+</div>
+</div>
+</div>
+<!-- END: Sidebar (Explorer) -->
+<!-- BEGIN: Main Editor Area -->
+<div class="flex-1 flex flex-col min-w-0 bg-[#0f141e]">
+<!-- Editor Tabs -->
+<div class="flex-none h-10 bg-[#161d2b] border-b border-[#2e3c54] flex overflow-x-auto no-scrollbar">
+<div class="px-4 py-2 bg-[#0f141e] text-blue-400 border-t-2 border-blue-400 flex items-center gap-2 cursor-pointer min-w-max">
+<i class="fa-brands fa-python"></i>
+<span class="text-sm font-medium">main.py</span>
+<i class="fa-solid fa-xmark text-xs hover:bg-[#2e3c54] rounded p-0.5 ml-2 text-[#94a3b8]"></i>
+</div>
+<div class="flex-1 flex justify-end items-center px-4 gap-3 text-[#94a3b8]">
+<button class="hover:text-white"><i class="fa-solid fa-play"></i></button>
+<button class="hover:text-white"><i class="fa-solid fa-table-columns"></i></button>
+<button class="hover:text-white"><i class="fa-solid fa-ellipsis"></i></button>
+</div>
+</div>
+<!-- Breadcrumbs -->
+<div class="flex-none px-4 py-1.5 text-xs text-[#94a3b8] flex items-center gap-1 border-b border-[#2e3c54] bg-[#0f141e]">
+<span>main.py</span>
+<i class="fa-solid fa-chevron-right text-[10px]"></i>
+<span>main.py</span>
+</div>
+<!-- Code Area -->
+<div class="flex-1 overflow-auto font-mono text-sm leading-relaxed p-4 flex">
+<!-- Line Numbers -->
+<div class="flex-none text-right pr-4 text-[#64748b] select-none flex flex-col">
+<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+<span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+<span>11</span><span>12</span><span>13</span><span>14</span><span>15</span>
+<span>16</span><span>17</span><span>18</span><span>19</span><span>20</span>
+<span>21</span><span>22</span><span>23</span><span>24</span><span>25</span>
+<span>26</span><span>27</span><span>28</span><span>29</span><span>30</span>
+<span>31</span><span>32</span><span>33</span><span>34</span><span>35</span>
+<span>36</span><span>37</span><span>38</span><span>39</span><span>40</span>
+<span>41</span><span>42</span><span>43</span><span>44</span><span>45</span>
+<span>46</span><span>47</span><span>48</span><span>49</span><span>50</span>
+</div>
+<!-- Code Content -->
+<div class="flex-1 whitespace-pre">
+<span class="keyword">import</span> python
+
+<span class="keyword">import</span> users
+
+<span class="keyword">def</span> <span class="function">data_processing</span>(data):
+    x <span class="operator">=</span> <span class="number">1</span>
+    result <span class="operator">=</span> data.results.token(data,data)
+    <span class="keyword">if</span> x <span class="operator">&gt;</span> <span class="number">0</span>:
+        data <span class="operator">:=</span> <span class="keyword">True</span>
+<span class="comment"># show result on the line of the set</span>
+<span class="keyword">if</span> x <span class="operator">&gt;</span> <span class="number">0</span>:
+            result <span class="operator">=</span> k._set
+        <span class="keyword">else</span>:
+            result <span class="operator">=</span> <span class="string">"esakl"</span>
+<span class="keyword">return</span> <span class="number">1</span>
+<span class="keyword">return</span> result
+
+
+<span class="keyword">def</span> <span class="function">detact_function</span>(cat,avgs):
+    <span class="keyword">def</span> <span class="function">in_precesski</span>:
+        result <span class="operator">=</span> seszt().data.tksc()
+        <span class="keyword">if</span> x <span class="operator">&gt;</span> <span class="number">0</span>:
+            result_processee()
+            
+        printf(<span class="string">"Snssst the result for the nossSure %s x"</span> <span class="operator">%</span>
+        data.result)
+
+    <span class="keyword">return</span> result
+
+
+<span class="keyword">def</span> <span class="function">__in__any</span>(data):
+    <span class="comment"># l:cost for better datasets</span>
+    result <span class="operator">=</span> data.<span class="number">2</span>()
+    loop <span class="operator">=</span> results.result()
+<div class="bg-blue-900/30 -mx-4 px-4 py-0.5 border-l-2 border-blue-500"> <span class="keyword">if</span> x.removevlt:|</div> <span class="keyword">return</span> loop
+        
+    <span class="keyword">if</span> cat.results(loop <span class="operator">==</span> data, dstt_in x <span class="operator">=</span> nesult, noo:
+        ratotdata, result)</div>
+</div>
+<!-- BEGIN: Terminal Panel -->
+<div class="h-64 border-t border-[#2e3c54] bg-[#161d2b] flex flex-col flex-none">
+<div class="flex-none px-4 flex items-center border-b border-[#2e3c54]">
+<div class="flex gap-4 text-xs font-serif font-semibold text-[#64748b] pt-2">
+<button class="pb-2 hover:text-white">PROBLEMS</button>
+<button class="pb-2 hover:text-white">OUTPUT</button>
+<button class="pb-2 hover:text-white">DEBUG CONSOLE</button>
+<button class="pb-2 text-white border-b-2 border-blue-400">TERMINAL</button>
+<button class="pb-2 hover:text-white">PORTS</button>
+</div>
+<div class="ml-auto flex items-center gap-3 text-[#94a3b8] pb-1">
+<span class="text-xs border border-[#2e3c54] px-2 py-0.5 rounded flex items-center gap-1"><i class="fa-solid fa-plus"></i> node</span>
+<button class="hover:text-white"><i class="fa-solid fa-trash-can text-sm"></i></button>
+<button class="hover:text-white"><i class="fa-solid fa-chevron-up text-sm"></i></button>
+<button class="hover:text-white"><i class="fa-solid fa-xmark text-sm"></i></button>
+</div>
+</div>
+<div class="flex-1 p-4 font-mono text-sm text-[#e2e8f0] overflow-y-auto">
+<div>PS C:\Users\Szostak&gt; python ---.py</div>
+<div>python = 4.1.6</div>
+<div>acceost = 8.8</div>
+<div>eeckie = 310:c</div>
+<div>enable = true</div>
+<div>loop = 3.5.1</div>
+<div>python.teclon = True</div>
+<div>python = 3.2.0</div>
+<div>python.machine==d.8.1</div>
+<div>python.apt = 8.8</div>
+<div>python = 5.8.0</div>
+<div>Rttp = 51.3</div>
+<div>python.osmo= 4.8.8</div>
+<div>python.usore = 4.0</div>
+<div>pythen = 3.8.2</div>
+<div>python = 4.1.0</div>
+<div class="mt-2 text-[#98c379]">PS C:\Users\Szostak&gt; <span class="animate-pulse">_</span></div>
+</div>
+</div>
+<!-- END: Terminal Panel -->
+</div>
+<!-- END: Main Editor Area -->
+<!-- BEGIN: Status Bar -->
+<div class="absolute bottom-0 left-0 right-0 h-6 bg-[#0f141e] border-t border-[#2e3c54] flex items-center px-3 text-xs text-[#94a3b8] justify-between z-10">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1 bg-blue-500 text-white px-2 h-full cursor-pointer hover:bg-blue-600">
+<i class="fa-solid fa-code-branch"></i> main
+          </div>
+<div class="flex items-center gap-1 cursor-pointer hover:text-white">
+<i class="fa-solid fa-arrows-rotate"></i> 0
+          </div>
+<div class="flex items-center gap-1 cursor-pointer hover:text-white">
+<i class="fa-solid fa-circle-xmark text-xs"></i> 0
+            <i class="fa-solid fa-triangle-exclamation text-xs ml-1"></i> 0
+          </div>
+</div>
+<div class="flex items-center gap-4">
+<span class="cursor-pointer hover:text-white">Ln 45, Col 17</span>
+<span class="cursor-pointer hover:text-white">Spaces: 4</span>
+<span class="cursor-pointer hover:text-white">UTF-8</span>
+<span class="cursor-pointer hover:text-white">CRLF</span>
+<span class="cursor-pointer hover:text-white">Python</span>
+<i class="fa-regular fa-bell cursor-pointer hover:text-white"></i>
+</div>
+</div>
+<!-- END: Status Bar -->
+</div>
+<!-- END: Editor Application Container -->
+<!-- BEGIN: AI Feedback Panel (Right Side) -->
+<aside class="w-[380px] bg-[#161d2b] border border-[#2e3c54] rounded-xl flex flex-col shadow-2xl flex-none overflow-hidden h-[calc(100vh-[12rem])] sticky top-6">
+<!-- Panel Header -->
+<div class="h-14 border-b border-[#2e3c54] flex items-center justify-between px-6 bg-[#0f141e] flex-none">
+<h2 class="font-serif font-bold text-lg">AI Code Review</h2>
+<button class="text-[#64748b] hover:text-white transition-colors">
+<i class="fa-solid fa-xmark"></i>
+</button>
+</div>
+<!-- Scrollable Feedback List -->
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-8">
+<!-- Actionable Suggestions Section -->
+<section>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+<i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+</div>
+<h3 class="font-serif font-semibold text-[#e2e8f0]">Actionable Suggestions</h3>
+</div>
+<div class="bg-[#0f141e] border border-[var(--feedback-suggestion-border)] rounded-lg p-5 shadow-sm relative overflow-hidden">
+<!-- Accent Left Border -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+<h4 class="font-bold text-blue-400 mb-2">Refactor function for better readability</h4>
+<p class="text-sm text-[#94a3b8] mb-4 leading-relaxed">
+              Refactor function for better readability to make software function and function. Below you can refactor and store you for excessive data problems.
+            </p>
+<div class="flex gap-3">
+<button class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-6 rounded-md transition-colors shadow-sm">Accept</button>
+<button class="bg-[#2e3c54] hover:bg-[#3b4c6b] text-white text-sm font-medium py-2 px-6 rounded-md transition-colors shadow-sm">Ignore</button>
+</div>
+</div>
+</section>
+<!-- Security Warnings Section -->
+<section>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center text-red-400">
+<i class="fa-solid fa-shield-halved text-sm"></i>
+</div>
+<h3 class="font-serif font-semibold text-[#e2e8f0]">Security Warnings</h3>
+</div>
+<div class="bg-[#0f141e] border border-[var(--feedback-warning-border)] rounded-lg p-5 shadow-sm relative overflow-hidden">
+<!-- Accent Left Border -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
+<h4 class="font-bold text-red-400 mb-2">Potential SQL Injection vulnerability detected in line 45</h4>
+<p class="text-sm text-[#94a3b8] mb-4 leading-relaxed">
+              Potential SQL Injection vulnerability detected in vulnerability data to use located in line 45.
+            </p>
+<div class="flex gap-3">
+<button class="bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 px-6 rounded-md transition-colors shadow-sm">Accept</button>
+<button class="bg-[#2e3c54] hover:bg-[#3b4c6b] text-white text-sm font-medium py-2 px-6 rounded-md transition-colors shadow-sm">Ignore</button>
+</div>
+</div>
+</section>
+<!-- Performance Tips Section -->
+<section>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+<i class="fa-solid fa-gauge-high text-sm"></i>
+</div>
+<h3 class="font-serif font-semibold text-[#e2e8f0]">Performance Tips</h3>
+</div>
+<div class="bg-[#0f141e] border border-[var(--feedback-performance-border)] rounded-lg p-5 shadow-sm relative overflow-hidden">
+<!-- Accent Left Border -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"></div>
+<h4 class="font-bold text-emerald-400 mb-2">Optimize loop for large datasets</h4>
+<p class="text-sm text-[#94a3b8] mb-4 leading-relaxed">
+              Optimize loop for large datasets to ensure code performance. Longhorn code estimates the process usage used is very large. Optimize loop for large datasets.
+            </p>
+<div class="flex gap-3">
+<button class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium py-2 px-6 rounded-md transition-colors shadow-sm">Accept</button>
+<button class="bg-[#2e3c54] hover:bg-[#3b4c6b] text-white text-sm font-medium py-2 px-6 rounded-md transition-colors shadow-sm">Ignore</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Panel Footer Action -->
+<div class="p-6 border-t border-[#2e3c54] bg-[#0f141e] mt-auto">
+<button class="w-full bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-600 hover:to-cyan-500 text-white font-serif font-bold py-3 px-4 rounded-lg shadow-lg transform transition hover:-translate-y-0.5">
+          Run AI Review
+        </button>
+</div>
+</aside>
+<!-- END: AI Feedback Panel -->
+</main>
+<!-- END: Main Workspace Area -->
+<!-- BEGIN: Footer -->
+<footer class="flex-none py-6 border-t border-[#2e3c54] bg-[#0f141e] text-[#64748b] text-sm mt-auto relative z-10">
+<div class="max-w-[1600px] mx-auto px-6 flex justify-between items-center">
+<p class="font-serif">© 2024 AI Code Reviewer. Alexandria Design.</p>
+<div class="flex gap-6 font-serif">
+<a class="hover:text-white transition-colors" href="#">Documentation</a>
+<a class="hover:text-white transition-colors" href="#">Privacy</a>
+<a class="hover:text-white transition-colors" href="#">Contact</a>
+</div>
+</div>
+</footer>
+<!-- END: Footer -->
+</body></html>
